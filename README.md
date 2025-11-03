@@ -18,6 +18,8 @@ Desenvolvido com **Next.js 16**, **Prisma ORM** e **PostgreSQL** e **Shadcn** pa
 
 ---
 
+#### Foi escolhido o **Next.js** com **Prisma** e **Typescript** por permitir um fluxo unificado entre **frontend** e **backend** com tipagem forte, o que reduz erros e acelera o desenvolvimento. Evitou-se utilizar Node + Express em um projeto separado porque aumentaria a complexidade de deploy e reduziria a produtividade, pois se trataria de dois projetos separados, ter feito em um único projeto agilizou a execução.
+
 ## 💡 Funcionalidades
 
 - 📊 **Dashboard de Analytics Completo**

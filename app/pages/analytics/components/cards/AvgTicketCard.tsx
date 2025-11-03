@@ -25,7 +25,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-// 🔹 Interfaces
 interface ChannelTicket {
   channel: string;
   avgTicket: number;
@@ -36,7 +35,6 @@ interface Store {
   name: string;
 }
 
-// 🔹 Formatar moeda
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat("pt-BR", {
     style: "currency",
@@ -126,7 +124,6 @@ export default function AvgTicketCard({ className = "" }) {
             </p>
           ) : (
             <>
-              {/* Ticket médio geral */}
               <div className="text-center mb-4">
                 <p className="text-slate-400 text-sm">Ticket médio geral</p>
                 <h3 className="text-3xl font-bold text-green-400">
