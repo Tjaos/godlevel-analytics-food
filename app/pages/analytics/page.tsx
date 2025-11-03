@@ -1,8 +1,8 @@
-import TopProductsCard from "./components/TopProductsCard";
-import AvgTicketCard from "./components/AvgTicketCard";
-import LowMarginCard from "./components/LowMarginCard";
-import DeliveryTimesCard from "./components/DeliveryTimesCard";
-import ChurnClientsCard from "./components/ChurnClientsCard";
+import TopProductsCard from "./components/cards/TopProductsCard";
+import AvgTicketCard from "./components/cards/AvgTicketCard";
+import LowMarginCard from "./components/cards/LowMarginCard";
+import DeliveryTimesCard from "./components/cards/DeliveryTimesCard";
+import ChurnClientsCard from "./components/cards/ChurnClientsCard";
 
 export default function AnalyticsPage() {
   return (
@@ -32,7 +32,7 @@ export default function AnalyticsPage() {
           tracking-tight
         "
       >
-        📊 Dashboard de Analytics
+        📊 Análise dos dados
       </h1>
 
       {/* Wrapper para centralização do grid */}

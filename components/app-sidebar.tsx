@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { Calendar, Home, Inbox, Search, Settings } from "lucide-react";
+import { Home, Inbox } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils";
 // Menu items
 const items = [
   {
-    title: "Home",
+    title: "Análise Geral",
     url: "/pages/analytics",
     icon: Home,
   },
@@ -25,21 +25,6 @@ const items = [
     title: "Vendas",
     url: "/pages/sales",
     icon: Inbox,
-  },
-  {
-    title: "Entregas",
-    url: "/delivery",
-    icon: Calendar,
-  },
-  {
-    title: "Buscar",
-    url: "#",
-    icon: Search,
-  },
-  {
-    title: "Configurações",
-    url: "#",
-    icon: Settings,
   },
 ];
 

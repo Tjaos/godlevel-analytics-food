@@ -4,55 +4,93 @@ import { db } from "@/lib/prisma";
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const channel = searchParams.get("channel") || "iFood";
-    const weekday = Number(searchParams.get("weekday") || 4); // quinta
-    const startHour = Number(searchParams.get("startHour") || 18);
-    const endHour = Number(searchParams.get("endHour") || 23);
 
-    const channelObj = await db.channels.findFirst({
-      where: { name: channel },
-    });
+    // 🔹 Parâmetros opcionais
+    const channelName = searchParams.get("channel");
+    const weekdayParam = searchParams.get("weekday");
+    const startHourParam = searchParams.get("startHour");
+    const endHourParam = searchParams.get("endHour");
 
-    const results = await db.sales.findMany({
+    const weekday = weekdayParam ? Number(weekdayParam) : null;
+    const startHour = startHourParam ? Number(startHourParam) : null;
+    const endHour = endHourParam ? Number(endHourParam) : null;
+
+    // 🔹 Período base fixo (mês de outubro)
+    const from = new Date("2025-10-01");
+    const to = new Date("2025-10-31");
+
+    // 🔹 Busca canal, se especificado
+    let channelId: number | undefined = undefined;
+    if (channelName) {
+      const channel = await db.channels.findFirst({
+        where: { name: { equals: channelName, mode: "insensitive" } },
+        select: { id: true },
+      });
+      if (channel) channelId = channel.id;
+    }
+
+    // 🔹 Busca vendas com produtos
+    const sales = await db.sales.findMany({
       where: {
-        channel_id: channelObj?.id,
-        created_at: {
-          gte: new Date("2025-10-01"),
-          lte: new Date("2025-10-29"),
+        ...(channelId && { channel_id: channelId }),
+        created_at: { gte: from, lte: to },
+      },
+      select: {
+        created_at: true,
+        product_sales: {
+          select: {
+            quantity: true,
+            products: { select: { id: true, name: true } },
+          },
         },
       },
-      include: {
-        product_sales: { include: { products: true } },
-      },
     });
 
-    const filtered = results.filter((s) => {
-      const d = new Date(s.created_at);
-      return (
-        d.getDay() === weekday &&
-        d.getHours() >= startHour &&
-        d.getHours() <= endHour
-      );
-    });
+    // 🔹 Agrupamento em memória com filtros
+    const grouped: Record<string, { total: number; count: number }> = {};
 
-    const productCount: Record<string, number> = {};
-    filtered.forEach((sale) => {
-      sale.product_sales.forEach((p) => {
-        const name = p.products.name;
-        productCount[name] = (productCount[name] || 0) + p.quantity;
+    sales.forEach((sale) => {
+      const date = new Date(sale.created_at);
+      const hour = date.getHours();
+      const day = date.getDay();
+
+      // Filtros
+      if (weekday !== null && day !== weekday) return;
+      if (
+        startHour !== null &&
+        endHour !== null &&
+        (hour < startHour || hour > endHour)
+      )
+        return;
+
+      sale.product_sales.forEach((ps) => {
+        const productName = ps.products.name;
+        if (!grouped[productName])
+          grouped[productName] = { total: 0, count: 0 };
+        grouped[productName].total += ps.quantity;
+        grouped[productName].count += 1;
       });
     });
 
-    const topProducts = Object.entries(productCount)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5)
-      .map(([name, quantity]) => ({ name, quantity }));
+    // 🔹 Se não tiver horário → média diária
+    const products = Object.entries(grouped).map(
+      ([name, { total, count }]) => ({
+        name,
+        totalSold:
+          startHour === null && endHour === null
+            ? Number((total / count).toFixed(2)) // média
+            : total, // total vendido no horário
+      })
+    );
 
-    return NextResponse.json(topProducts);
+    // 🔹 Ordena do mais vendido pro menos
+    const ordered = products.sort((a, b) => b.totalSold - a.totalSold);
+
+    return NextResponse.json(ordered);
   } catch (error) {
-    console.error(error);
+    console.error("❌ Erro em /api/analytics/top-products:", error);
     return NextResponse.json(
-      { error: "Erro ao buscar top products" },
+      { error: "Erro ao buscar produtos mais vendidos" },
       { status: 500 }
     );
   }
